@@ -58,7 +58,7 @@ std::size_t number_of_files_in_directory(fs::path path)
     return std::distance(fs::recursive_directory_iterator(path), fs::recursive_directory_iterator{});
 }
 
-void index(std::string from, QProgressBar *bar)
+void index(std::string from, my_signals* my_signal)
 {
     CNT_FILES = 0;
     std::ofstream out(path_pair_file, std::ios::out);
@@ -70,7 +70,8 @@ void index(std::string from, QProgressBar *bar)
     size_t cnt = 0;
     double add_progress = 100.0 / number_of_files_in_directory(from) * 1.0;
 
-    bar->setValue(int(cnt * add_progress));
+    emit my_signal->send_index_bar(int(cnt * add_progress));
+    //bar->setValue(int(cnt * add_progress));
 
     for (const auto& entry : fs::recursive_directory_iterator(from)) {
         cnt++;
@@ -102,7 +103,8 @@ void index(std::string from, QProgressBar *bar)
         }
 
         in.close();
-        bar->setValue(int(cnt * add_progress));
+        emit my_signal->send_index_bar(int(cnt * add_progress));
+        //bar->setValue(int(cnt * add_progress));
     }
 
     out.close();
@@ -112,7 +114,7 @@ void index(std::string from, QProgressBar *bar)
     //also not thread safe
 
     int pos = 0;
-    std::array<unsigned char, BYTE_COUNT_IN_INT> byte = get_char_arr_from_int(0);
+    //std::array<unsigned char, BYTE_COUNT_IN_INT> byte = get_char_arr_from_int(0);
     for (auto it : cnt_tri) {
         if (!ptr_dir.count(it.first))
                 ptr_dir[it.first] = pos;
@@ -177,8 +179,9 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         if (cnt == 0)
             continue;
         in.seekg(pos);
+        //Мы сможем создать массив на cnt * 4
         unsigned char buffer[cnt * 4];
-        memset(buffer, 0, cnt * 4);
+        memset(buffer, 0, size_t(cnt * 4));
         in.read((char*)buffer, sizeof(buffer));
 
         //mutex lock or this
@@ -207,5 +210,3 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         }
     }
 }
-
-

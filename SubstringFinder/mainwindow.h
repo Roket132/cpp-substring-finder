@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QProgressBar>
 
 static std::string DIRECTORY_NAME = "";
+static QProgressBar *INDEX_BAR;
 
 namespace Ui {
 class MainWindow;
@@ -18,15 +20,13 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_browseButton_pressed();
-
     void on_browseButton_clicked();
 
-    void on_pushButton_clicked();
-
-    void on_indexButton_clicked();
-
     void on_pushButton_2_clicked();
+
+    void detuch_index_bar();
+
+    void indexing_completed();
 
 private:
     Ui::MainWindow *ui;

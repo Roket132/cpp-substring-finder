@@ -41,7 +41,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>30</y>
+      <y>40</y>
       <width>291</width>
       <height>25</height>
      </rect>
@@ -64,7 +64,7 @@
     <property name="geometry">
      <rect>
       <x>330</x>
-      <y>30</y>
+      <y>40</y>
       <width>81</width>
       <height>25</height>
      </rect>
@@ -115,8 +115,8 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>500</y>
+      <x>40</x>
+      <y>460</y>
       <width>118</width>
       <height>23</height>
      </rect>
@@ -164,30 +164,17 @@
      <string>PushButton</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="indexButton">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>100</y>
-      <width>291</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Index</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>80</y>
-      <width>67</width>
+      <y>20</y>
+      <width>151</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Choose directory:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -201,6 +188,19 @@
     </property>
     <property name="text">
      <string>Founde x files</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="index_status">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>510</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>

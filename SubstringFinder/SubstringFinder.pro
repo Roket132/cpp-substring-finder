@@ -28,12 +28,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     trigram.cpp \
-    index.cpp
+    index.cpp \
+    async_index.cpp \
+    my_signals.cpp
 
 HEADERS += \
         mainwindow.h \
     trigram.h \
-    index.h
+    index.h \
+    async_index.h \
+    my_signals.h
 
 FORMS += \
         mainwindow.ui
