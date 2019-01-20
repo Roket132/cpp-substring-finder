@@ -1,14 +1,20 @@
-#include "index.h"
+#include "index_help.h"
 
 
-trigram NULL_T(0, 0, 0);
+extern trigram NULL_T;
 unsigned int CNT_FILES = 0;
+
+std::map<trigram, int> cnt_tri;
+std::map<trigram, int> ptr_dir;
+std::map<trigram, int> indexed;
+std::map<fs::path, unsigned int> number_from_path;
+std::map<unsigned int, fs::path> path_from_number;
 
 trigram split(std::vector<trigram> &tri, char *buffer, trigram last) {
     trigram t(last);
     for (int i = 0; i < BUFFER_SIZE_; i++) {
         //if check box
-        if (int(buffer[i]) == -48 || int(buffer[i]) == -47) {
+        if (int(buffer[i]) < 0/*int(buffer[i]) == -48 || int(buffer[i]) == -47*/) {
             i++;
         }
         t.add(buffer[i]);
@@ -38,7 +44,7 @@ void split_str_on_trigram(const std::string &str, std::vector<trigram> &ans) {
     trigram trig(1, str[0], str[1]);
     for (size_t i = 2; i < str.length(); i++) {
         //if check box
-        if (int(str[i]) == -48 || int(str[i]) == -47) {
+        if (int(str[i]) < 0/*int(str[i]) == -48 || int(str[i]) == -47*/) {
             i++;
         }
         trig.add(str[i]);
@@ -64,12 +70,13 @@ std::array<unsigned char, BYTE_COUNT_IN_INT> get_char_arr_from_int(unsigned int 
     return result;
 }
 
+
 std::size_t number_of_files_in_directory(fs::path path)
 {
     return std::distance(fs::recursive_directory_iterator(path), fs::recursive_directory_iterator{});
 }
-
-void index(std::string from, my_signals* my_signal)
+/*
+void index_V(std::string from, my_signals* my_signal)
 {
     CNT_FILES = 0;
     std::ofstream out;
@@ -91,6 +98,7 @@ void index(std::string from, my_signals* my_signal)
     //bar->setValue(int(cnt * add_progress));
 
     for (const auto& entry : fs::recursive_directory_iterator(from)) {
+        //std::cerr << STOP << std::endl;
         cnt++;
         fs::path path = entry.path();
         try {
@@ -153,6 +161,7 @@ void index(std::string from, my_signals* my_signal)
 
     int pos = 0;
     for (auto it : cnt_tri) {
+
         if (!ptr_dir.count(it.first))
                 ptr_dir[it.first] = pos;
 
@@ -185,7 +194,6 @@ void index(std::string from, my_signals* my_signal)
             }
         }
 
-
         std::sort(v_tri.begin(), v_tri.end());
         v_tri.erase(unique(v_tri.begin(), v_tri.end()), v_tri.end());
 
@@ -205,6 +213,7 @@ void index(std::string from, my_signals* my_signal)
     }
 }
 
+*/
 void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
 {
     std::ifstream in(path_index_file, std::ios::in);
@@ -261,3 +270,5 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         }
     }
 }
+
+

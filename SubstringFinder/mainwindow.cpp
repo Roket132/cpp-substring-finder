@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "index.h"
+#include "index_help.h"
 #include "async_index.h"
 #include "my_signals.h"
 #include "searcher.h"
@@ -12,10 +12,12 @@
 #include <QProcess>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QMutex>
 
 std::string DIRECTORY_NAME = "";
 bool INDEXED = false;
 bool INDEX_IN_PROGRESS = false;
+size_t CNT_FOUND_FILES = 0;
 QProgressBar *INDEX_BAR = nullptr;
 
 
@@ -30,9 +32,30 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
     ui->statusBar->addWidget(ui->index_status);
 
-    //button setting
+    ui->searchBar->setStyleSheet(
+        "QProgressBar {"
+            "border: 2px solid grey;"
+            "border-radius: 5px;"
+            "text-align: center;"
+        "}"
+        "QProgressBar::chunk {"
+            "background-color: rgb(84, 84, 84);"
+            "width: 10px;"
+            "margin: 0.5px;"
+        "}"
+    );
+
+    /*
+     * rgb(88, 245, 49); green
+     *
+    */
+
+    ui->searchBar->setValue(100);
+
+    //buttons connect
     connect (ui->openDirButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_Directory_triggered() ));
     connect (ui->openFileButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_File_triggered() ));
+    connect (ui->deleteFileButton, SIGNAL( clicked() ), this, SLOT( on_actionDelete_File_triggered() ));
 }
 
 MainWindow::~MainWindow()
@@ -45,12 +68,21 @@ MainWindow::~MainWindow()
  *  indexing path "DIRECTORY_NAME"
  */
 void MainWindow::index_task() {
+    if (INDEX_IN_PROGRESS) {
+        std::cout << "liol" << std::endl;
+        emit stop_index();
+    }
     INDEX_IN_PROGRESS = true;
 
     //status indexing on GUI
     ui->index_status->setText("indexing not completed");
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
 
+    if (INDEX_BAR != nullptr) {
+        ui->statusBar->removeWidget(INDEX_BAR);
+        delete INDEX_BAR;
+        INDEX_BAR = nullptr;
+    }
     INDEX_BAR = new QProgressBar();
     ui->statusBar->addPermanentWidget(INDEX_BAR);
     try {
@@ -63,6 +95,7 @@ void MainWindow::index_task() {
         connect(my_signal, SIGNAL(send_index_bar(int)), INDEX_BAR, SLOT(setValue(int)));
         connect(my_signal, SIGNAL(detuch_index_bar()), this, SLOT(detuch_index_bar()));
         connect(my_signal, SIGNAL(indexing_completed()), this, SLOT(indexing_completed()));
+        connect(this, SIGNAL(stop_index()), my_index, SLOT(stop_index()), Qt::DirectConnection);
         connect(thread, SIGNAL(started()), my_index, SLOT(do_index()));
 
         thread->start();
@@ -76,19 +109,19 @@ void MainWindow::on_browseButton_clicked()
     QString str;
     try {
         str = QFileDialog::getExistingDirectory(nullptr, "Directory Dialog", "");
-        INDEXED = false;
-        if (str == "") {
-            throw "todo";
-        }
+        if (str == "") throw "todo";
     } catch (...) {
-        std::cout << "stop" << std::endl;
+        std::cerr << "Choose directory was canceled"<< std::endl;
         str = QString::fromStdString(DIRECTORY_NAME);
     }
 
-    DIRECTORY_NAME = str.toStdString();
-    ui->pathEdit->setText("Directory: " + QString::fromStdString(DIRECTORY_NAME));
+    if (DIRECTORY_NAME != str.toStdString()) {
+        DIRECTORY_NAME = str.toStdString();
+        INDEXED = false;
+        ui->pathEdit->setText(QString::fromStdString(DIRECTORY_NAME));
 
-    index_task();
+        index_task();
+    }
 }
 
 
@@ -96,6 +129,7 @@ void MainWindow::detuch_index_bar()
 {
     ui->statusBar->removeWidget(INDEX_BAR);
     delete INDEX_BAR;
+    INDEX_BAR = nullptr;
 }
 
 void MainWindow::indexing_completed()
@@ -141,9 +175,14 @@ void MainWindow::on_run_button_clicked()
 
     qRegisterMetaType<std::string>("std::string");
     connect(my_searcher, SIGNAL(send_file(std::string)), this, SLOT(take_file(std::string)));
+    connect (this, SIGNAL( stop_search() ), my_searcher, SLOT( stop_search() ),  Qt::DirectConnection);
+    connect (my_searcher, SIGNAL( inc_cnt_found_files(int) ), this, SLOT( set_cnt_found_files(int) ));
     connect(thread, SIGNAL(started()), my_searcher, SLOT(run()));
 
+
+
     thread->start();
+
 }
 
 void MainWindow::take_file(std::string str)
@@ -192,14 +231,10 @@ void MainWindow::on_actionOpen_File_triggered()
     }
     fs::path path = file.toStdString();
     file = QString::fromStdString(path);
-    std::string task = "gedit \"" + file.toStdString() +"\"";
     QProcess* process = new QProcess;
     QStringList list;
-    std::cout << "\"" + file.toStdString() +"\"" << std::endl;
     list << file;
     process->start("gedit", list);
-
-    //system(task.c_str());
 }
 
 void MainWindow::on_actionDelete_File_triggered()
@@ -229,6 +264,20 @@ void MainWindow::on_actionDelete_File_triggered()
                 delete item;
             }
         }
+        set_cnt_found_files(--CNT_FOUND_FILES);
         fs::remove(path);
     }
+}
+
+void MainWindow::on_stopSearchButton_clicked()
+{
+    std::cout << "tut ok" << std::endl;
+    emit stop_search();
+}
+
+void MainWindow::set_cnt_found_files(int cnt)
+{
+    CNT_FOUND_FILES = cnt;
+    QString str = "Found " + QString::number(CNT_FOUND_FILES) + " files";
+    ui->foundFilesLable->setText(str);
 }

@@ -29,18 +29,18 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     trigram.cpp \
-    index.cpp \
     async_index.cpp \
     my_signals.cpp \
-    searcher.cpp
+    searcher.cpp \
+    index_help.cpp
 
 HEADERS += \
         mainwindow.h \
     trigram.h \
-    index.h \
     async_index.h \
     my_signals.h \
-    searcher.h
+    searcher.h \
+    index_help.h
 
 FORMS += \
         mainwindow.ui

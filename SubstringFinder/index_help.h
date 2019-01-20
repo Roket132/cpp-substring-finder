@@ -26,23 +26,19 @@ const std::string path_index_file = ".index.txt";
 
 namespace fs = std::experimental::filesystem;
 
-static std::map<trigram, int> cnt_tri;
-static std::map<trigram, int> ptr_dir;
-static std::map<trigram, int> indexed;
-static std::map<fs::path, unsigned int> number_from_path;
-static std::map<unsigned int, fs::path> path_from_number;
-
-
 ///Принимает файл, и отдает список trigram
 void split_file_on_trigram(const std::string &path, std::vector<trigram> &ans);
 
 unsigned int get_int_from_arr_byte(const std::array<unsigned char, BYTE_COUNT_IN_INT> &charsArray);
-std::array<unsigned char, BYTE_COUNT_IN_INT> get_char_arr_from_int(unsigned int value);
 
-void index(std::string from, my_signals* my_signal);
+std::array<unsigned char, BYTE_COUNT_IN_INT> get_char_arr_from_int(unsigned int value);
 
 void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files);
 
+trigram split(std::vector<trigram> &tri, char *buffer, trigram last);
 
+void index_V(std::string from, my_signals* my_signal);
+
+std::size_t number_of_files_in_directory(fs::path path);
 
 #endif // INDEX_H

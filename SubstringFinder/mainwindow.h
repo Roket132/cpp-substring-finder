@@ -33,6 +33,15 @@ private slots:
 
     void on_actionDelete_File_triggered();
 
+    void on_stopSearchButton_clicked();
+
+    void set_cnt_found_files(int);
+
+signals:
+    void stop_search();
+
+    void stop_index();
+
 private:
     Ui::MainWindow *ui;
 

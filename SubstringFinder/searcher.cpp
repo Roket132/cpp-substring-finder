@@ -6,29 +6,39 @@ extern bool INDEXED;
 
 void searcher::run()
 {
+    emit inc_cnt_found_files(0);
     std::set<fs::path> check_files;
-    if (!INDEXED) {
+    size_t min_sign = (int(text_[0]) > 0 ? 2 : 4);
+    if (!INDEXED || text_.size() <= min_sign) {
 
         for (const auto& entry : fs::recursive_directory_iterator(DIRECTORY_NAME)) {
+            if (STOP_) {
+                return;
+            }
             fs::path path = entry.path();
             check_files.insert(path);
             if (findInputStringInFile(text_, path)) {
                 emit send_file(path);
+                emit inc_cnt_found_files(++cnt_found_files);
             }
 
             //index already ready (in async_index)
-            if (INDEXED) {
+            if (INDEXED && text_.size() > min_sign) {
                 break;
             }
         }
     }
 
     for (auto file : candidate_) {
+        if (STOP_) {
+            return;
+        }
         if (check_files.size() > 0 && check_files.count(file)) {
             continue;
         }
         if (findInputStringInFile(text_, file)) {
             emit send_file(file);
+            emit inc_cnt_found_files(++cnt_found_files);
         }
     }
 }
@@ -37,6 +47,14 @@ searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> can
 {
     swap(candidate, candidate_);
     swap(text, text_);
+    STOP_ = false;
+    cnt_found_files = 0;
+}
+
+void searcher::stop_search()
+{
+    std::cout << "OK " << std::endl;
+    STOP_ = true;
 }
 
 
