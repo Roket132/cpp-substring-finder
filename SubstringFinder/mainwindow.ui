@@ -203,6 +203,39 @@
      </rect>
     </property>
    </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>470</y>
+      <width>361</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="openDirButton">
+       <property name="text">
+        <string>Open directory</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="openFileButton">
+       <property name="text">
+        <string>Open file</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteFileButton">
+       <property name="text">
+        <string>Delete file</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -221,10 +254,42 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen_Directory"/>
+   <addaction name="actionOpen_File"/>
+   <addaction name="actionDelete_File"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_Directory">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/gtk-directory.png</normaloff>:/icons/gtk-directory.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Directory</string>
+   </property>
+  </action>
+  <action name="actionOpen_File">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/file.png</normaloff>:/icons/file.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open File</string>
+   </property>
+  </action>
+  <action name="actionDelete_File">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/Delete.png</normaloff>:/icons/Delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete File</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

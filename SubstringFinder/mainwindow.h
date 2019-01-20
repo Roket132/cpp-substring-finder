@@ -27,10 +27,20 @@ private slots:
 
     void take_file(std::string);
 
+    void on_actionOpen_Directory_triggered();
+
+    void on_actionOpen_File_triggered();
+
+    void on_actionDelete_File_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     void index_task();
+
+    void show_in_folder(const QString &path);
+
+    QString get_select_item();
 };
 
 #endif // MAINWINDOW_H

@@ -9,6 +9,9 @@
 #include <iostream>
 #include <thread>
 #include <QThread>
+#include <QProcess>
+#include <QDesktopServices>
+#include <QMessageBox>
 
 std::string DIRECTORY_NAME = "";
 bool INDEXED = false;
@@ -26,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->index_status->setText("indexing didn't start");
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
     ui->statusBar->addWidget(ui->index_status);
+
+    //button setting
+    connect (ui->openDirButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_Directory_triggered() ));
+    connect (ui->openFileButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_File_triggered() ));
 }
 
 MainWindow::~MainWindow()
@@ -144,4 +151,84 @@ void MainWindow::take_file(std::string str)
     QString QStr = QString::fromStdString(str);
     QListWidgetItem *item = new QListWidgetItem(QStr);
     ui->listWidget->addItem(item);
+}
+
+void MainWindow::show_in_folder(const QString &path)
+{
+    QFileInfo info(path);
+#if defined(Q_OS_WIN)
+    QStringList args;
+    if (!info.isDir())
+     args << "/select,";
+    args << QDir::toNativeSeparators(path);
+    if (QProcess::startDetached("explorer", args))
+     return;
+#endif
+    QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir()? path : info.path()));
+}
+
+QString MainWindow::get_select_item()
+{
+    QString file;
+    for (auto it : ui->listWidget->selectedItems()) {
+        file = it->text();
+    }
+    return file;
+}
+
+void MainWindow::on_actionOpen_Directory_triggered()
+{
+    QString file = get_select_item();
+    fs::path path = file.toStdString();
+    file = QString::fromStdString(path.parent_path());
+    show_in_folder(file);
+}
+
+void MainWindow::on_actionOpen_File_triggered()
+{
+    QString file = get_select_item();
+    if (file == "") {
+        return;
+    }
+    fs::path path = file.toStdString();
+    file = QString::fromStdString(path);
+    std::string task = "gedit \"" + file.toStdString() +"\"";
+    QProcess* process = new QProcess;
+    QStringList list;
+    std::cout << "\"" + file.toStdString() +"\"" << std::endl;
+    list << file;
+    process->start("gedit", list);
+
+    //system(task.c_str());
+}
+
+void MainWindow::on_actionDelete_File_triggered()
+{
+    QString file = get_select_item();
+    if (file == "") {
+        return;
+    }
+    fs::path path = file.toStdString();
+    QString file_name = QString::fromStdString(path.filename());
+    QString message = "The file \"" + file_name + "\" will be deleted";
+    int n = QMessageBox::warning(0,
+                                 "Warning",
+                                 message +
+                                 "\n Do you want to delete file?",
+                                 "Yes",
+                                 "No",
+                                 QString(),
+                                 0,
+                                 1
+                                );
+    if(!n) {
+        std::vector<QListWidgetItem> items;
+        for (int i = 0; i < ui->listWidget->count(); i++) {
+            auto item = ui->listWidget->item(i);
+            if (item->text().toStdString() == path.string()) {
+                delete item;
+            }
+        }
+        fs::remove(path);
+    }
 }
