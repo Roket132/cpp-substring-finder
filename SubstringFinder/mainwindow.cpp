@@ -17,10 +17,9 @@
 std::string DIRECTORY_NAME = "";
 bool INDEXED = false;
 bool INDEX_IN_PROGRESS = false;
+bool SEARCHE_IN_PROGRESS = false;
 size_t CNT_FOUND_FILES = 0;
 QProgressBar *INDEX_BAR = nullptr;
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -124,7 +123,6 @@ void MainWindow::on_browseButton_clicked()
     }
 }
 
-
 void MainWindow::detuch_index_bar()
 {
     ui->statusBar->removeWidget(INDEX_BAR);
@@ -139,7 +137,6 @@ void MainWindow::indexing_completed()
     INDEXED = true;
     INDEX_IN_PROGRESS = false;
 }
-
 
 void MainWindow::on_run_button_clicked()
 {
@@ -160,14 +157,9 @@ void MainWindow::on_run_button_clicked()
     std::vector<fs::path> files;
     get_files_with_same_trigram(str, files);
 
-    //
-    for(auto it : files) {
-        std::cout << it << std::endl;
+    if (SEARCHE_IN_PROGRESS) {
+        emit stop_search();
     }
-
-    std::cout << std::endl;
-    //
-
     QThread *thread= new QThread;
     searcher *my_searcher = new searcher(files, str);
 
@@ -177,10 +169,11 @@ void MainWindow::on_run_button_clicked()
     connect(my_searcher, SIGNAL(send_file(std::string)), this, SLOT(take_file(std::string)));
     connect (this, SIGNAL( stop_search() ), my_searcher, SLOT( stop_search() ),  Qt::DirectConnection);
     connect (my_searcher, SIGNAL( inc_cnt_found_files(int) ), this, SLOT( set_cnt_found_files(int) ));
+    connect (my_searcher, SIGNAL( search_complited() ), this, SLOT( search_complited() ));
     connect(thread, SIGNAL(started()), my_searcher, SLOT(run()));
 
 
-
+    SEARCHE_IN_PROGRESS = true;
     thread->start();
 
 }
@@ -280,4 +273,9 @@ void MainWindow::set_cnt_found_files(int cnt)
     CNT_FOUND_FILES = cnt;
     QString str = "Found " + QString::number(CNT_FOUND_FILES) + " files";
     ui->foundFilesLable->setText(str);
+}
+
+void MainWindow::search_complited()
+{
+    SEARCHE_IN_PROGRESS = false;
 }

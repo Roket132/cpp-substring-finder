@@ -23,6 +23,7 @@ public slots:
 signals:
     void send_file(std::string);
     void inc_cnt_found_files(int);
+    void search_complited();
 private:
     std::vector<fs::path> candidate_;
     std::string text_;

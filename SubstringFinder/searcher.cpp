@@ -41,6 +41,7 @@ void searcher::run()
             emit inc_cnt_found_files(++cnt_found_files);
         }
     }
+    emit search_complited();
 }
 
 searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> candidate, std::string text)
@@ -53,7 +54,7 @@ searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> can
 
 void searcher::stop_search()
 {
-    std::cout << "OK " << std::endl;
+    std::cerr << "STOP SEARCHE" << std::endl;
     STOP_ = true;
 }
 

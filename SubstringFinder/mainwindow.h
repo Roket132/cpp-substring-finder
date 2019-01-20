@@ -37,6 +37,8 @@ private slots:
 
     void set_cnt_found_files(int);
 
+    void search_complited();
+
 signals:
     void stop_search();
 
