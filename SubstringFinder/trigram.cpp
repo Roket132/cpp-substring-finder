@@ -4,15 +4,17 @@ trigram::trigram() {
     _1 = _2 = _3 = 1;
 }
 
-trigram::trigram(char a,char b, char c) : _1(a), _2(b), _3(c) {}
+//trigram::trigram(char a, char b, char c) : _1(a), _2(b), _3(c) {}
 
-//trigram::trigram(unsigned char a, unsigned char b, unsigned char c) : _1(a), _2(b), _3(c) {}
+trigram::trigram(unsigned char a, unsigned char b, unsigned char c) : _1(a), _2(b), _3(c) {}
 
-void trigram::add(unsigned char ch) {
+void trigram::add(signed char ch) {
     _1 = _2;
     _2 = _3;
     _3 = ch;
 }
+
+trigram::trigram(int A, char a, char b, char c) : _1(a), _2(b), _3(c) {}
 
 std::ostream &operator<<(std::ostream &s, trigram const &a) {
     s << a._1 << a._2 << a._3;
@@ -20,9 +22,9 @@ std::ostream &operator<<(std::ostream &s, trigram const &a) {
 }
 
 std::istream &operator>>(std::istream &s, trigram &a) {
-    a._1 = static_cast<char>(s.get());
-    a._2 = static_cast<char>(s.get());
-    a._3 = static_cast<char>(s.get());
+    a._1 = static_cast<signed char>(s.get());
+    a._2 = static_cast<signed char>(s.get());
+    a._3 = static_cast<signed char>(s.get());
     return s;
 }
 

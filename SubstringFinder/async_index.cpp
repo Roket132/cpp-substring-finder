@@ -2,8 +2,6 @@
 
 
 void async_index::do_index() {
-    std::cout << DIRECTORY_NAME << std::endl;
-
     bool ok = true;
     try {
         index(DIRECTORY_NAME, my_signal);

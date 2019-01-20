@@ -24,20 +24,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
     trigram.cpp \
     index.cpp \
     async_index.cpp \
-    my_signals.cpp
+    my_signals.cpp \
+    searcher.cpp
 
 HEADERS += \
         mainwindow.h \
     trigram.h \
     index.h \
     async_index.h \
-    my_signals.h
+    my_signals.h \
+    searcher.h
 
 FORMS += \
         mainwindow.ui

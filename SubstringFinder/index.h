@@ -16,7 +16,7 @@
 
 
 /// Должно быть кратно 8
-const int BUFFER_SIZE_ = 8;
+const int BUFFER_SIZE_ = 1024;
 
 const size_t BYTE_COUNT_IN_INT = 4;
 const size_t BITS_COUNT_IN_BYTE = 8;
@@ -31,7 +31,7 @@ static std::map<trigram, int> ptr_dir;
 static std::map<trigram, int> indexed;
 static std::map<fs::path, unsigned int> number_from_path;
 static std::map<unsigned int, fs::path> path_from_number;
-static unsigned int CNT_FILES;
+
 
 ///Принимает файл, и отдает список trigram
 void split_file_on_trigram(const std::string &path, std::vector<trigram> &ans);

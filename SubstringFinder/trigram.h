@@ -13,11 +13,13 @@
 
 class trigram {
 public:
-    char _1, _2, _3;
+    signed char _1, _2, _3;
 
     trigram();
 
-    trigram(char a, char b, char c);
+    trigram(int A, char a, char b, char c);
+
+    trigram(unsigned char a, unsigned char b, unsigned char c);
 
     trigram(const trigram &o) = default;
 
@@ -29,13 +31,15 @@ public:
 
     friend bool operator>(trigram const &a, trigram const &b);
 
-    void add(unsigned char ch);
+    void add(signed char ch);
 
     friend std::ostream &operator<<(std::ostream &s, trigram const &a);
 
     friend std::istream &operator>>(std::istream &s, trigram &a);
+
+
 };
 
-static trigram NULL_T(0, 0, 0);
+//static trigram NULL_T(0, 0, 0, 0);
 
 #endif // TRIGRAM_H
