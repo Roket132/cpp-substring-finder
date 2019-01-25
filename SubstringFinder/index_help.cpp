@@ -6,8 +6,7 @@ unsigned int CNT_FILES = 0;
 trigram split(std::vector<trigram> &tri, char *buffer, trigram last) {
     trigram t(last);
     for (int i = 0; i < BUFFER_SIZE_; i++) {
-        //if check box
-        if (int(buffer[i]) < 0/*int(buffer[i]) == -48 || int(buffer[i]) == -47*/) {
+        if (int(buffer[i]) < 0) {
             i++;
         }
         t.add(buffer[i]);
@@ -19,9 +18,7 @@ trigram split(std::vector<trigram> &tri, char *buffer, trigram last) {
 
 void split_file_on_trigram(const std::string &path, std::vector<trigram> &ans) {
     std::ifstream in(path, std::ios::in);
-
     ans.clear();
-
     char buffer[BUFFER_SIZE_];
     memset(buffer, 0, BUFFER_SIZE_);
     trigram last;
@@ -36,8 +33,7 @@ void split_str_on_trigram(const std::string &str, std::vector<trigram> &ans) {
         return;
     trigram trig(1, str[0], str[1]);
     for (size_t i = 2; i < str.length(); i++) {
-        //if check box
-        if (int(str[i]) < 0/*int(str[i]) == -48 || int(str[i]) == -47*/) {
+        if (int(str[i]) < 0) {
             i++;
         }
         trig.add(str[i]);
@@ -79,18 +75,13 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         vec.clear();
         int pos = data.ptr_dir[tri];
         int cnt = data.cnt_tri[tri];
-
-        //mutex lock
-
         if (cnt == 0)
             continue;
+
         in.seekg(pos);
-        //Мы сможем создать массив на cnt * 4
         unsigned char buffer[cnt * 4];
         memset(buffer, 0, size_t(cnt * 4));
         in.read((char*)buffer, sizeof(buffer));
-
-        //mutex lock or this
 
         int ind = 0;
         for (int i = 0; i < cnt; i++) {
@@ -101,8 +92,6 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
 
             ind += 4;
         }
-
-        //mutex unlock
 
         sort(vec.begin(), vec.end());
         vec.erase(unique(vec.begin(), vec.end()), vec.end());
@@ -118,5 +107,3 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         }
     }
 }
-
-

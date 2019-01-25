@@ -31,7 +31,4 @@ progress_bar_style::progress_bar_style() :
                "background-color: rgb(244, 0, 0);"
                "width: 10px;"
                "margin: 0.5px;"
-               "}")
-{
-
-}
+               "}") {}

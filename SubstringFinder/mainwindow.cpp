@@ -25,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    //add lable
     ui->setupUi(this);
     ui->index_status->setText("indexing didn't start");
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
@@ -34,7 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->searchBar->setValue(100);
 
-    //buttons connect
     connect (ui->openDirButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_Directory_triggered() ));
     connect (ui->openFileButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_File_triggered() ));
     connect (ui->deleteFileButton, SIGNAL( clicked() ), this, SLOT( on_actionDelete_File_triggered() ));
@@ -47,16 +45,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/*
- *  This func indexing path == DIRECTORY_NAME
- */
 void MainWindow::index_task() {
     if (INDEX_IN_PROGRESS) {
         emit stop_index();
     }
     INDEX_IN_PROGRESS = true;
 
-    //status indexing on GUI
     ui->index_status->setText("indexing not completed");
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
 
@@ -82,7 +76,7 @@ void MainWindow::index_task() {
 
         thread->start();
     } catch (...) {
-        std::cout << "inde was failed" << std::endl;
+        std::cout << "index was failed" << std::endl;
     }
 }
 
@@ -145,10 +139,7 @@ void MainWindow::on_run_button_clicked()
         get_files_with_same_trigram(str, files);
     }
 
-    //clear outList
     ui->listWidget->clear();
-
-
     if (SEARCHE_IN_PROGRESS) {
         emit stop_search();
     }
@@ -166,22 +157,17 @@ void MainWindow::on_run_button_clicked()
     connect (this, SIGNAL( set_search_pause(bool) ), my_searcher, SLOT( set_pause(bool) ), Qt::DirectConnection);
     connect(thread, SIGNAL(started()), my_searcher, SLOT(run()));
 
-
     SEARCHE_IN_PROGRESS = true;
     ui->run_button->setEnabled(false);
     ui->searchBar->setStyleSheet(progress_bar_style().run_style);
-
     thread->start();
-
 }
-
 
 void MainWindow::take_file(std::string str)
 {
     QString QStr = QString::fromStdString(str);
     QListWidgetItem *item = new QListWidgetItem(QStr);
     ui->listWidget->addItem(item);
-
 }
 
 void MainWindow::show_in_folder(const QString &path)

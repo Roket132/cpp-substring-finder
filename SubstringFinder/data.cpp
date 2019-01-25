@@ -7,4 +7,3 @@ data &data::get_instance()
     static data instance;
     return instance;
 }
-

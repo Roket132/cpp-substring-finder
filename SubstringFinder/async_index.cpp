@@ -29,9 +29,7 @@ async_index::async_index(std::string str, my_signals* index_s_) : DIRECTORY_NAME
 
 void split_file(const std::string &path, std::vector<trigram> &ans) {
     std::ifstream in(path, std::ios::in);
-
     ans.clear();
-
     char buffer[BUFFER_SIZE_];
     memset(buffer, 0, BUFFER_SIZE_);
     trigram last;
@@ -64,7 +62,6 @@ void async_index::index(std::string from, my_signals* my_signal)
 
     size_t cnt = 0;
     double add_progress = 100.0 / number_of_files_in_directory(from) * 1.0;
-
     emit my_signal->send_index_bar(int(cnt * add_progress));
 
     for (const auto& entry : fs::recursive_directory_iterator(from)) {
@@ -90,18 +87,16 @@ void async_index::index(std::string from, my_signals* my_signal)
 
         data.path_from_number[++CNT_FILES] = path;
         data.number_from_path[path] = CNT_FILES;
-
         std::vector<trigram> tri;
 
         split_file(path, tri);
         if (tri.size() > MAX_TRIGRAM) {
             continue;
         }
+
         DO_STOP
         sort(tri.begin(), tri.end());
         tri.erase(unique(tri.begin(), tri.end()), tri.end());
-
-        //this cycle - bottle neck, but not thread safe
 
         for (auto it : tri) {
             DO_STOP
@@ -129,8 +124,6 @@ void async_index::index(std::string from, my_signals* my_signal)
         throw e;
     }
 
-    //also not thread safe
-
     int pos = 0;
     for (auto it : data.cnt_tri) {
         DO_STOP
@@ -145,9 +138,6 @@ void async_index::index(std::string from, my_signals* my_signal)
     }
 
     std::vector<std::pair<trigram, unsigned int>> v_tri;
-
-    //not thread safe
-
     unsigned char buffer[BUFFER_SIZE_];
     memset(buffer, 0, BUFFER_SIZE_);
 
@@ -162,19 +152,15 @@ void async_index::index(std::string from, my_signals* my_signal)
                     break;
                 std::array<unsigned char, BYTE_COUNT_IN_INT> arr = {buffer[ind + 4], buffer[ind + 5], buffer[ind + 6],
                                                                     buffer[ind + 7]};
-
                 unsigned int file_number = get_int_from_arr_byte(arr);
                 v_tri.emplace_back(trig, file_number);
                 ind += 8;
             }
         }
 
-
         DO_STOP
         std::sort(v_tri.begin(), v_tri.end());
         v_tri.erase(unique(v_tri.begin(), v_tri.end()), v_tri.end());
-
-        //not thread safe, but, maybe? We reading in diff pos...
 
         for (auto it : v_tri) {
             DO_STOP

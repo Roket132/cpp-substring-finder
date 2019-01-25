@@ -4,8 +4,6 @@ trigram::trigram() {
     _1 = _2 = _3 = 1;
 }
 
-//trigram::trigram(char a, char b, char c) : _1(a), _2(b), _3(c) {}
-
 trigram::trigram(signed char a, signed char b, signed char c) : _1(a), _2(b), _3(c) {}
 
 void trigram::add(signed char ch) {

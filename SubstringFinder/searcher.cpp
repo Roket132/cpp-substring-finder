@@ -3,11 +3,9 @@
 
 #include <qmutex.h>
 
-const int cnt_sends = 200;
-
+static const int cnt_sends = 200;
 extern std::string DIRECTORY_NAME;
 extern bool INDEXED;
-
 
 std::size_t number_of_files_in_directory(fs::path path)
 {
@@ -28,19 +26,16 @@ void searcher::run()
         std::set<fs::path> check_files;
         size_t min_sign = (int(text_[0]) > 0 ? 2 : 4);
         if (!INDEXED || text_.size() <= min_sign) {
-
             for (const auto& entry : fs::recursive_directory_iterator(DIRECTORY_NAME)) {
                 // pause
                 PAUSE.lock();
                 PAUSE.unlock();
-                // pause
-
-                cnt++;
-
                 if (STOP_) {
                     emit search_complited();
                     return;
                 }
+
+                cnt++;
                 fs::path path = entry.path();
                 try {
                     if (fs::is_directory(path) || fs::is_empty(path) || fs::is_block_file(path)) {
@@ -64,7 +59,6 @@ void searcher::run()
                     std::cerr << "search in file " << path << " was failed" << std::endl;
                 }
 
-
                 //index already ready (in async_index)
                 if (INDEXED && text_.size() > min_sign) {
                     break;
@@ -75,19 +69,16 @@ void searcher::run()
 
         cnt = cnt_files - candidate_.size();
         inc_search_bar(cnt * add_progress);
-
         for (auto file : candidate_) {
             // pause
-
             PAUSE.lock();
             PAUSE.unlock();
-            // pause
-
-            cnt++;
             if (STOP_) {
                 emit search_complited();
                 return;
             }
+
+            cnt++;
             if (check_files.size() > 0 && check_files.count(file)) {
                 continue;
             }
@@ -115,8 +106,6 @@ void searcher::run()
     emit search_complited();
 }
 
-
-
 searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> candidate, std::string text)
 {
     swap(candidate, candidate_);
@@ -135,17 +124,15 @@ void searcher::set_pause(bool value)
 {
     if (value) {
         if (!pause_) {
-            pause_ = true;
             PAUSE.lock();
         }
     } else {
         if (pause_) {
-            pause_ = false;
             PAUSE.unlock();
         }
     }
+    pause_ = !pause_;
 }
-
 
 bool findInputStringInFile(std::string &inputString, fs::path p) {
     std::ifstream file(p);
@@ -187,5 +174,3 @@ bool findInputStringInFile(std::string &inputString, fs::path p) {
     file.close();
     return false;
 }
-
-
