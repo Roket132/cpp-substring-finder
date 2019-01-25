@@ -5,6 +5,7 @@
 #include "ui_mainwindow.h"
 #include "my_signals.h"
 #include "index_help.h"
+#include "data.h"
 
 #include <QObject>
 #include <QProgressBar>

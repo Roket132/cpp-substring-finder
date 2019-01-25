@@ -3,6 +3,7 @@
 
 #include "my_signals.h"
 #include "trigram.h"
+#include "data.h"
 
 #include <string>
 #include <vector>

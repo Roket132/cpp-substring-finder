@@ -32,7 +32,8 @@ SOURCES += \
     async_index.cpp \
     my_signals.cpp \
     searcher.cpp \
-    index_help.cpp
+    index_help.cpp \
+    data.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
     async_index.h \
     my_signals.h \
     searcher.h \
-    index_help.h
+    index_help.h \
+    data.h
 
 FORMS += \
         mainwindow.ui

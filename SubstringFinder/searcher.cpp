@@ -7,39 +7,59 @@ extern bool INDEXED;
 void searcher::run()
 {
     emit inc_cnt_found_files(0);
-    std::set<fs::path> check_files;
-    size_t min_sign = (int(text_[0]) > 0 ? 2 : 4);
-    if (!INDEXED || text_.size() <= min_sign) {
+    try {
+        std::set<fs::path> check_files;
+        size_t min_sign = (int(text_[0]) > 0 ? 2 : 4);
+        if (!INDEXED || text_.size() <= min_sign) {
 
-        for (const auto& entry : fs::recursive_directory_iterator(DIRECTORY_NAME)) {
+            for (const auto& entry : fs::recursive_directory_iterator(DIRECTORY_NAME)) {
+                if (STOP_) {
+                    return;
+                }
+                fs::path path = entry.path();
+                try {
+                    if (fs::is_directory(path) || fs::is_empty(path) || fs::is_block_file(path)) {
+                        continue;
+                    }
+                } catch (fs::filesystem_error e) {
+                    std::cerr << e.what() << std::endl;
+                }
+                check_files.insert(path);
+                try {
+                    if (findInputStringInFile(text_, path)) {
+                        emit send_file(path);
+                        emit inc_cnt_found_files(++cnt_found_files);
+                    }
+                } catch (...) {
+                    std::cerr << "search in file " << path << " was failed" << std::endl;
+                }
+
+
+                //index already ready (in async_index)
+                if (INDEXED && text_.size() > min_sign) {
+                    break;
+                }
+            }
+        }
+
+        for (auto file : candidate_) {
             if (STOP_) {
                 return;
             }
-            fs::path path = entry.path();
-            check_files.insert(path);
-            if (findInputStringInFile(text_, path)) {
-                emit send_file(path);
-                emit inc_cnt_found_files(++cnt_found_files);
+            if (check_files.size() > 0 && check_files.count(file)) {
+                continue;
             }
-
-            //index already ready (in async_index)
-            if (INDEXED && text_.size() > min_sign) {
-                break;
+            try {
+                if (findInputStringInFile(text_, file)) {
+                    emit send_file(file);
+                    emit inc_cnt_found_files(++cnt_found_files);
+                }
+            } catch (...) {
+                std::cerr << "search in file " << file << " was failed"  << std::endl;
             }
         }
-    }
-
-    for (auto file : candidate_) {
-        if (STOP_) {
-            return;
-        }
-        if (check_files.size() > 0 && check_files.count(file)) {
-            continue;
-        }
-        if (findInputStringInFile(text_, file)) {
-            emit send_file(file);
-            emit inc_cnt_found_files(++cnt_found_files);
-        }
+    } catch (...) {
+        std::cerr << "search was failed" << std::endl;
     }
     emit search_complited();
 }
@@ -54,7 +74,6 @@ searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> can
 
 void searcher::stop_search()
 {
-    std::cerr << "STOP SEARCHE" << std::endl;
     STOP_ = true;
 }
 

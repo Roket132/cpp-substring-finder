@@ -63,12 +63,10 @@ MainWindow::~MainWindow()
 }
 
 /*
- *  not SLOT, just func
- *  indexing path "DIRECTORY_NAME"
+ *  This func indexing path == DIRECTORY_NAME
  */
 void MainWindow::index_task() {
     if (INDEX_IN_PROGRESS) {
-        std::cout << "liol" << std::endl;
         emit stop_index();
     }
     INDEX_IN_PROGRESS = true;
@@ -99,7 +97,7 @@ void MainWindow::index_task() {
 
         thread->start();
     } catch (...) {
-        std::cout << "failed index" << std::endl;
+        std::cout << "inde was failed" << std::endl;
     }
 }
 

@@ -4,12 +4,6 @@ QMutex INDEXING_MUTEX;
 bool STOP = false;
 trigram NULL_T(0, 0, 0);
 
-extern std::map<trigram, int> cnt_tri;
-extern std::map<trigram, int> ptr_dir;
-extern std::map<trigram, int> indexed;
-extern std::map<fs::path, unsigned int> number_from_path;
-extern std::map<unsigned int, fs::path> path_from_number;
-
 void async_index::do_index() {
     INDEXING_MUTEX.lock();
     bool ok = true;
@@ -17,8 +11,7 @@ void async_index::do_index() {
         index(DIRECTORY_NAME, my_signal);
         my_signal->detuch_index_bar();
     } catch (...) {
-        std::cout << "failed index" << std::endl;
-        //my_signal->detuch_index_bar();
+        std::cerr << "index was failed" << std::endl;
         ok = false;
     }
     if (ok) {
@@ -29,7 +22,6 @@ void async_index::do_index() {
 
 void async_index::stop_index()
 {
-    std::cout << "yes " << std::endl;
     STOP_ = true;
 }
 
@@ -61,18 +53,18 @@ void async_index::index(std::string from, my_signals* my_signal)
         throw e;
     }
 
-    ptr_dir.clear();
-    cnt_tri.clear();
-    indexed.clear();
+    data &data = data.get_instance();
+
+    data.ptr_dir.clear();
+    data.cnt_tri.clear();
+    data.indexed.clear();
 
     size_t cnt = 0;
     double add_progress = 100.0 / number_of_files_in_directory(from) * 1.0;
 
     emit my_signal->send_index_bar(int(cnt * add_progress));
-    //bar->setValue(int(cnt * add_progress));
 
     for (const auto& entry : fs::recursive_directory_iterator(from)) {
-        //std::cerr << STOP << std::endl;
         DO_STOP
         cnt++;
         fs::path path = entry.path();
@@ -93,8 +85,8 @@ void async_index::index(std::string from, my_signals* my_signal)
             continue;
         }
 
-        path_from_number[++CNT_FILES] = path;
-        number_from_path[path] = CNT_FILES;
+        data.path_from_number[++CNT_FILES] = path;
+        data.number_from_path[path] = CNT_FILES;
 
         std::vector<trigram> tri;
 
@@ -113,7 +105,7 @@ void async_index::index(std::string from, my_signals* my_signal)
             unsigned int file_name = CNT_FILES;
             std::array<unsigned char, BYTE_COUNT_IN_INT> byte = get_char_arr_from_int(file_name);
             out << it << " " << byte[0] << byte[1] << byte[2] << byte[3];
-            cnt_tri[it]++;
+            data.cnt_tri[it]++;
 
         }
 
@@ -137,10 +129,10 @@ void async_index::index(std::string from, my_signals* my_signal)
     //also not thread safe
 
     int pos = 0;
-    for (auto it : cnt_tri) {
+    for (auto it : data.cnt_tri) {
         DO_STOP
-        if (!ptr_dir.count(it.first))
-                ptr_dir[it.first] = pos;
+        if (!data.ptr_dir.count(it.first))
+                data.ptr_dir[it.first] = pos;
 
 
         for (int i = 0; i < it.second; i++) {
@@ -185,13 +177,13 @@ void async_index::index(std::string from, my_signals* my_signal)
             DO_STOP
             trigram trig = it.first;
 
-            int pos = ptr_dir[trig] + (4 * indexed[trig]);
+            int pos = data.ptr_dir[trig] + (4 * data.indexed[trig]);
             out.seekp(pos);
-            indexed[trig]++;
+            data.indexed[trig]++;
             std::array<unsigned char, BYTE_COUNT_IN_INT> byte = get_char_arr_from_int(it.second);
             out << byte[0] << byte[1] << byte[2] << byte[3];
         }
    } catch (...) {
-       std::cout << "indexing faild exeption " << std::endl;
+       std::cerr << "index was failed" << std::endl;
     }
 }
