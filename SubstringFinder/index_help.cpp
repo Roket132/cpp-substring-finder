@@ -1,16 +1,8 @@
 #include "index_help.h"
 
-
-
-extern trigram NULL_T;
+static trigram NULL_T(0, 0, 0);
 unsigned int CNT_FILES = 0;
-/*
-std::map<trigram, int> cnt_tri;
-std::map<trigram, int> ptr_dir;
-std::map<trigram, int> indexed;
-std::map<fs::path, unsigned int> number_from_path;
-std::map<unsigned int, fs::path> path_from_number;
-*/
+
 trigram split(std::vector<trigram> &tri, char *buffer, trigram last) {
     trigram t(last);
     for (int i = 0; i < BUFFER_SIZE_; i++) {
@@ -71,12 +63,6 @@ std::array<unsigned char, BYTE_COUNT_IN_INT> get_char_arr_from_int(unsigned int 
     return result;
 }
 
-
-std::size_t number_of_files_in_directory(fs::path path)
-{
-    return std::distance(fs::recursive_directory_iterator(path), fs::recursive_directory_iterator{});
-}
-
 void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
 {
     std::ifstream in(path_index_file, std::ios::in);
@@ -86,11 +72,7 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
     std::vector<trigram> vec_tri;
     split_str_on_trigram(text, vec_tri);
 
-    using namespace std;
-
-
     data &data = data.get_instance();
-
 
     bool first = true;
     for (auto tri : vec_tri) {

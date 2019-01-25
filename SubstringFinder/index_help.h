@@ -17,7 +17,7 @@
 
 
 /// Должно быть кратно 8
-const int BUFFER_SIZE_ = 1024;
+const int BUFFER_SIZE_ = 32768;
 
 const size_t BYTE_COUNT_IN_INT = 4;
 const size_t BITS_COUNT_IN_BYTE = 8;

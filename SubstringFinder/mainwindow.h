@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QProgressBar>
+#include "progress_bar_style.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,10 +40,16 @@ private slots:
 
     void search_complited();
 
+    void inc_search_bar(int);
+
+    void on_pauseButton_clicked();
+
 signals:
     void stop_search();
 
     void stop_index();
+
+    void set_search_pause(bool);
 
 private:
     Ui::MainWindow *ui;
@@ -52,6 +59,8 @@ private:
     void show_in_folder(const QString &path);
 
     QString get_select_item();
+
+    bool search_is_paused;
 };
 
 #endif // MAINWINDOW_H

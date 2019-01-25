@@ -33,7 +33,8 @@ SOURCES += \
     my_signals.cpp \
     searcher.cpp \
     index_help.cpp \
-    data.cpp
+    data.cpp \
+    progress_bar_style.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     my_signals.h \
     searcher.h \
     index_help.h \
-    data.h
+    data.h \
+    progress_bar_style.h
 
 FORMS += \
         mainwindow.ui

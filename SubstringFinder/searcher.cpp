@@ -1,19 +1,44 @@
 #include "searcher.h"
 #include "mainwindow.h"
 
+#include <qmutex.h>
+
+const int cnt_sends = 200;
+
 extern std::string DIRECTORY_NAME;
 extern bool INDEXED;
 
+
+std::size_t number_of_files_in_directory(fs::path path)
+{
+    return std::distance(fs::recursive_directory_iterator(path), fs::recursive_directory_iterator{});
+}
+
 void searcher::run()
 {
-    emit inc_cnt_found_files(0);
+    std::vector<std::string> paths;
     try {
+        bool promis = true;
+        emit inc_cnt_found_files(0);
+
+        size_t cnt = 0, cnt_files = number_of_files_in_directory(DIRECTORY_NAME);
+        double add_progress = 100.0 / cnt_files * 1.0;
+        emit inc_search_bar(0);
+
         std::set<fs::path> check_files;
         size_t min_sign = (int(text_[0]) > 0 ? 2 : 4);
         if (!INDEXED || text_.size() <= min_sign) {
 
             for (const auto& entry : fs::recursive_directory_iterator(DIRECTORY_NAME)) {
+                // pause
+                PAUSE.lock();
+                PAUSE.unlock();
+                // pause
+
+                cnt++;
+
                 if (STOP_) {
+                    emit search_complited();
                     return;
                 }
                 fs::path path = entry.path();
@@ -27,7 +52,12 @@ void searcher::run()
                 check_files.insert(path);
                 try {
                     if (findInputStringInFile(text_, path)) {
-                        emit send_file(path);
+                        paths.push_back(path);
+                        if (promis) emit send_file(path);
+                        if (promis && paths.size() > cnt_sends) {
+                            promis = false;
+                            paths.clear();
+                        }
                         emit inc_cnt_found_files(++cnt_found_files);
                     }
                 } catch (...) {
@@ -39,11 +69,23 @@ void searcher::run()
                 if (INDEXED && text_.size() > min_sign) {
                     break;
                 }
+                inc_search_bar(cnt * add_progress);
             }
         }
 
+        cnt = cnt_files - candidate_.size();
+        inc_search_bar(cnt * add_progress);
+
         for (auto file : candidate_) {
+            // pause
+
+            PAUSE.lock();
+            PAUSE.unlock();
+            // pause
+
+            cnt++;
             if (STOP_) {
+                emit search_complited();
                 return;
             }
             if (check_files.size() > 0 && check_files.count(file)) {
@@ -51,30 +93,57 @@ void searcher::run()
             }
             try {
                 if (findInputStringInFile(text_, file)) {
-                    emit send_file(file);
+                    paths.push_back(file);
+                    if (promis) emit send_file(file);
+                    if (promis && paths.size() > cnt_sends) {
+                        promis = false;
+                        paths.clear();
+                    }
                     emit inc_cnt_found_files(++cnt_found_files);
                 }
             } catch (...) {
                 std::cerr << "search in file " << file << " was failed"  << std::endl;
             }
+            inc_search_bar(cnt * add_progress);
         }
     } catch (...) {
         std::cerr << "search was failed" << std::endl;
     }
+    for (auto file : paths) {
+        emit send_file(file);
+    }
     emit search_complited();
 }
+
+
 
 searcher::searcher(std::vector<std::experimental::filesystem::__cxx11::path> candidate, std::string text)
 {
     swap(candidate, candidate_);
     swap(text, text_);
     STOP_ = false;
+    pause_ = false;
     cnt_found_files = 0;
 }
 
 void searcher::stop_search()
 {
     STOP_ = true;
+}
+
+void searcher::set_pause(bool value)
+{
+    if (value) {
+        if (!pause_) {
+            pause_ = true;
+            PAUSE.lock();
+        }
+    } else {
+        if (pause_) {
+            pause_ = false;
+            PAUSE.unlock();
+        }
+    }
 }
 
 

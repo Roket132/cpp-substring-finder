@@ -17,9 +17,7 @@ public:
 
     trigram();
 
-    trigram(int A, char a, char b, char c);
-
-    trigram(unsigned char a, unsigned char b, unsigned char c);
+    trigram(signed char a, signed char b, signed char c);
 
     trigram(const trigram &o) = default;
 

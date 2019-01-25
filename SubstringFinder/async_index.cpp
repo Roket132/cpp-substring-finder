@@ -1,8 +1,8 @@
 #include "async_index.h"
 
-QMutex INDEXING_MUTEX;
-bool STOP = false;
-trigram NULL_T(0, 0, 0);
+const int MAX_TRIGRAM = 200000;
+static QMutex INDEXING_MUTEX;
+static trigram NULL_T(0, 0, 0);
 
 void async_index::do_index() {
     INDEXING_MUTEX.lock();
@@ -37,6 +37,9 @@ void split_file(const std::string &path, std::vector<trigram> &ans) {
     trigram last;
     while (in.read(buffer, sizeof(buffer)).gcount() > 0) {
         last = split(ans, buffer, last);
+        if (ans.size() > MAX_TRIGRAM) {
+            return;
+        }
     }
 }
 
@@ -91,7 +94,7 @@ void async_index::index(std::string from, my_signals* my_signal)
         std::vector<trigram> tri;
 
         split_file(path, tri);
-        if (tri.size() > 200000) {
+        if (tri.size() > MAX_TRIGRAM) {
             continue;
         }
         DO_STOP

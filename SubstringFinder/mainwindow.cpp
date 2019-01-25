@@ -16,10 +16,10 @@
 
 std::string DIRECTORY_NAME = "";
 bool INDEXED = false;
-bool INDEX_IN_PROGRESS = false;
-bool SEARCHE_IN_PROGRESS = false;
-size_t CNT_FOUND_FILES = 0;
-QProgressBar *INDEX_BAR = nullptr;
+static bool INDEX_IN_PROGRESS = false;
+static bool SEARCHE_IN_PROGRESS = false;
+static int CNT_FOUND_FILES = 0;
+static QProgressBar *INDEX_BAR = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,24 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->index_status->setText("indexing didn't start");
     ui->index_status->setStyleSheet("color: rgb(204, 6, 5)");
     ui->statusBar->addWidget(ui->index_status);
-
-    ui->searchBar->setStyleSheet(
-        "QProgressBar {"
-            "border: 2px solid grey;"
-            "border-radius: 5px;"
-            "text-align: center;"
-        "}"
-        "QProgressBar::chunk {"
-            "background-color: rgb(84, 84, 84);"
-            "width: 10px;"
-            "margin: 0.5px;"
-        "}"
-    );
-
-    /*
-     * rgb(88, 245, 49); green
-     *
-    */
+    ui->searchBar->setStyleSheet(progress_bar_style().default_style);
 
     ui->searchBar->setValue(100);
 
@@ -55,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (ui->openDirButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_Directory_triggered() ));
     connect (ui->openFileButton, SIGNAL( clicked() ), this, SLOT( on_actionOpen_File_triggered() ));
     connect (ui->deleteFileButton, SIGNAL( clicked() ), this, SLOT( on_actionDelete_File_triggered() ));
+
+    search_is_paused = false;
 }
 
 MainWindow::~MainWindow()
@@ -138,6 +123,15 @@ void MainWindow::indexing_completed()
 
 void MainWindow::on_run_button_clicked()
 {
+    QString QStr = ui->textEdit->text();
+
+    if (QStr == "" || DIRECTORY_NAME == "") {
+        return;
+    }
+
+    std::string str = QStr.toStdString();
+    std::vector<fs::path> files;
+
     if (INDEXED) {
         if (fs::last_write_time(DIRECTORY_NAME) > fs::last_write_time(path_index_file)) {
             INDEXED = false;
@@ -145,15 +139,15 @@ void MainWindow::on_run_button_clicked()
     }
     if (!INDEXED && !INDEX_IN_PROGRESS) {
         index_task();
+    };
+
+    if (INDEXED) {
+        get_files_with_same_trigram(str, files);
     }
 
     //clear outList
     ui->listWidget->clear();
 
-    QString QStr = ui->textEdit->text();
-    std::string str = QStr.toStdString();
-    std::vector<fs::path> files;
-    get_files_with_same_trigram(str, files);
 
     if (SEARCHE_IN_PROGRESS) {
         emit stop_search();
@@ -168,19 +162,26 @@ void MainWindow::on_run_button_clicked()
     connect (this, SIGNAL( stop_search() ), my_searcher, SLOT( stop_search() ),  Qt::DirectConnection);
     connect (my_searcher, SIGNAL( inc_cnt_found_files(int) ), this, SLOT( set_cnt_found_files(int) ));
     connect (my_searcher, SIGNAL( search_complited() ), this, SLOT( search_complited() ));
+    connect (my_searcher, SIGNAL( inc_search_bar(int) ), this, SLOT( inc_search_bar(int) ));
+    connect (this, SIGNAL( set_search_pause(bool) ), my_searcher, SLOT( set_pause(bool) ), Qt::DirectConnection);
     connect(thread, SIGNAL(started()), my_searcher, SLOT(run()));
 
 
     SEARCHE_IN_PROGRESS = true;
+    ui->run_button->setEnabled(false);
+    ui->searchBar->setStyleSheet(progress_bar_style().run_style);
+
     thread->start();
 
 }
+
 
 void MainWindow::take_file(std::string str)
 {
     QString QStr = QString::fromStdString(str);
     QListWidgetItem *item = new QListWidgetItem(QStr);
     ui->listWidget->addItem(item);
+
 }
 
 void MainWindow::show_in_folder(const QString &path)
@@ -237,7 +238,7 @@ void MainWindow::on_actionDelete_File_triggered()
     fs::path path = file.toStdString();
     QString file_name = QString::fromStdString(path.filename());
     QString message = "The file \"" + file_name + "\" will be deleted";
-    int n = QMessageBox::warning(0,
+    int n = QMessageBox::warning(nullptr,
                                  "Warning",
                                  message +
                                  "\n Do you want to delete file?",
@@ -262,7 +263,12 @@ void MainWindow::on_actionDelete_File_triggered()
 
 void MainWindow::on_stopSearchButton_clicked()
 {
-    std::cout << "tut ok" << std::endl;
+    if (!SEARCHE_IN_PROGRESS) {
+        return;
+    }
+    if (search_is_paused) {
+        on_pauseButton_clicked();
+    }
     emit stop_search();
 }
 
@@ -276,4 +282,26 @@ void MainWindow::set_cnt_found_files(int cnt)
 void MainWindow::search_complited()
 {
     SEARCHE_IN_PROGRESS = false;
+    ui->run_button->setEnabled(true);
+    ui->searchBar->setStyleSheet(progress_bar_style().default_style);
+}
+
+void MainWindow::inc_search_bar(int value)
+{
+    ui->searchBar->setValue(value);
+}
+
+void MainWindow::on_pauseButton_clicked()
+{
+    if (!SEARCHE_IN_PROGRESS) {
+        return;
+    }
+    if (!search_is_paused) {
+        emit set_search_pause(true);
+        ui->searchBar->setStyleSheet(progress_bar_style().stop_style);
+    } else {
+        emit set_search_pause(false);
+        ui->searchBar->setStyleSheet(progress_bar_style().run_style);
+    }
+    search_is_paused = !search_is_paused;
 }
