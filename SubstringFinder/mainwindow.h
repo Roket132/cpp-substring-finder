@@ -24,6 +24,8 @@ private slots:
 
     void indexing_completed();
 
+    void error_indexing_complited();
+
     void on_run_button_clicked();
 
     void take_file(std::string);

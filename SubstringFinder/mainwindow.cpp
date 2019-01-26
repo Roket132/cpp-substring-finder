@@ -115,6 +115,13 @@ void MainWindow::indexing_completed()
     INDEX_IN_PROGRESS = false;
 }
 
+void MainWindow::error_indexing_complited()
+{
+    ui->index_status->setText("indexing error");
+    INDEXED = false;
+    INDEX_IN_PROGRESS = false;
+}
+
 void MainWindow::on_run_button_clicked()
 {
     QString QStr = ui->textEdit->text();
@@ -133,7 +140,7 @@ void MainWindow::on_run_button_clicked()
     }
     if (!INDEXED && !INDEX_IN_PROGRESS) {
         index_task();
-    };
+    }
 
     if (INDEXED) {
         get_files_with_same_trigram(str, files);

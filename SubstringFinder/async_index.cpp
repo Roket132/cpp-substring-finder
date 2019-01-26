@@ -9,14 +9,17 @@ void async_index::do_index() {
     bool ok = true;
     try {
         index(DIRECTORY_NAME, my_signal);
-        my_signal->detuch_index_bar();
+    } catch(std::exception e) {
+        std::cerr << e.what() << std::endl;
+        ok = false;
     } catch (...) {
-        std::cerr << "index was failed" << std::endl;
+        std::cerr << "index was failed" << std::endl;        
         ok = false;
     }
     if (ok) {
         emit my_signal->indexing_completed();
     }
+    my_signal->detuch_index_bar();
     INDEXING_MUTEX.unlock();
 }
 

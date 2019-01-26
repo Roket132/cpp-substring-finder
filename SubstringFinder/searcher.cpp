@@ -97,8 +97,10 @@ void searcher::run()
             }
             inc_search_bar(cnt * add_progress);
         }
+    } catch (std::exception e) {
+        std::cerr << e.what() << std::endl;
     } catch (...) {
-        std::cerr << "search was failed" << std::endl;
+        std::cerr << "search was failed with unknown error" << std::endl;
     }
     for (auto file : paths) {
         emit send_file(file);
