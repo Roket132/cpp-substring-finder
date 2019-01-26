@@ -15,8 +15,8 @@ std::size_t number_of_files_in_directory(fs::path path)
 void searcher::run()
 {
     std::vector<std::string> paths;
+    bool promis = true;
     try {
-        bool promis = true;
         emit inc_cnt_found_files(0);
 
         size_t cnt = 0, cnt_files = number_of_files_in_directory(DIRECTORY_NAME);
@@ -101,6 +101,9 @@ void searcher::run()
         std::cerr << e.what() << std::endl;
     } catch (...) {
         std::cerr << "search was failed with unknown error" << std::endl;
+    }
+    if (promis) {
+        paths.clear();
     }
     for (auto file : paths) {
         emit send_file(file);

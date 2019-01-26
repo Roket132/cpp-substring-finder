@@ -78,6 +78,8 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
         if (cnt == 0)
             continue;
 
+
+
         in.seekg(pos);
         unsigned char buffer[cnt * 4];
         memset(buffer, 0, size_t(cnt * 4));
@@ -93,6 +95,7 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
             ind += 4;
         }
 
+
         sort(vec.begin(), vec.end());
         vec.erase(unique(vec.begin(), vec.end()), vec.end());
         if (first) {
@@ -106,4 +109,5 @@ void get_files_with_same_trigram(std::string text, std::vector<fs::path> &files)
             swap(files, intersection);
         }
     }
+
 }
