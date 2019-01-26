@@ -6,9 +6,9 @@ unsigned int CNT_FILES = 0;
 trigram split(std::vector<trigram> &tri, char *buffer, trigram last) {
     trigram t(last);
     for (int i = 0; i < BUFFER_SIZE_; i++) {
-        if (int(buffer[i]) < 0) {
+        /*if (int(buffer[i]) < 0) {
             i++;
-        }
+        }*/
         t.add(buffer[i]);
         if (t != NULL_T)
             tri.push_back(t);
@@ -33,9 +33,9 @@ void split_str_on_trigram(const std::string &str, std::vector<trigram> &ans) {
         return;
     trigram trig(1, str[0], str[1]);
     for (size_t i = 2; i < str.length(); i++) {
-        if (int(str[i]) < 0) {
+        /*if (int(str[i]) < 0) {
             i++;
-        }
+        }*/
         trig.add(str[i]);
         ans.push_back(trig);
     }
